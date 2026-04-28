@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anti-China and Anti-US Activity Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/antipower/assets/index-Bw6tu1gB.js"></script>
+    <link rel="stylesheet" crossorigin href="/antipower/assets/index-rJ01POcc.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <h1>Anti-China and Anti-US Activity</h1>
+        <p class="subtitle">Geocoded incidents and official responses, 1989&ndash;2025</p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside id="filters" class="panel filters-panel">
+        <section class="filter-block">
+          <h2>Map view</h2>
+          <div class="radio-group" id="view-toggle">
+            <label><input type="radio" name="view" value="incidents" checked /> Individual incidents</label>
+            <label><input type="radio" name="view" value="countries" /> Counts by country</label>
+          </div>
+        </section>
+
+        <section class="filter-block">
+          <h2>Target</h2>
+          <div class="radio-group" id="dataset-toggle">
+            <label><input type="radio" name="dataset" value="both" checked /> Both</label>
+            <label><input type="radio" name="dataset" value="anti-china" /> Anti-China</label>
+            <label><input type="radio" name="dataset" value="anti-us" /> Anti-US</label>
+          </div>
+        </section>
+
+        <section class="filter-block">
+          <h2>Year</h2>
+          <div id="year-slider"></div>
+          <div class="year-readout"><span id="year-min">—</span> <span class="dash">–</span> <span id="year-max">—</span></div>
+        </section>
+
+        <section class="filter-block">
+          <h2>Category</h2>
+          <div class="category-buttons">
+            <button id="cat-all" type="button">All</button>
+            <button id="cat-none" type="button">None</button>
+          </div>
+          <div id="category-list"></div>
+        </section>
+
+        <section class="filter-block legend-block">
+          <h2>Response status</h2>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="has-response-only" />
+            Show only events with a response
+          </label>
+          <ul class="legend">
+            <li><span class="dot dot-cn"></span> China response identified</li>
+            <li><span class="dot dot-us"></span> US response identified</li>
+            <li><span class="dot dot-mfa"></span> MFA Q&amp;A matched</li>
+            <li><span class="dot dot-media"></span> State media matched</li>
+          </ul>
+        </section>
+
+        <section class="filter-block" style="border-bottom:none;">
+          <h2>Codebook</h2>
+          <div class="cb-list">
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#34495e;"></span>
+                <span class="cb-name">Political Influence</span>
+              </summary>
+              <div class="cb-body">
+                <p>Events protesting perceived foreign interference in domestic political processes — influence operations, disinformation, media manipulation, backing of political parties, or pressure to shape government policy.</p>
+                <p><em>Typical events:</em> protests against foreign-backed candidates; demonstrations against foreign-funded NGOs; incidents targeting political lobbying.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#e67e22;"></span>
+                <span class="cb-name">Project Grievance</span>
+              </summary>
+              <div class="cb-body">
+                <p>Protests, strikes, or violence directed at a specific foreign-funded or foreign-operated project — mine, dam, road, or construction site — over local conditions: wages, labour practices, environmental damage, or safety.</p>
+                <p><em>Boundary:</em> grievance targets a specific site's conduct, not foreign presence in the country generally (see Sovereignty &amp; Territorial).</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#2c5f8d;"></span>
+                <span class="cb-name">Sovereignty &amp; Territorial</span>
+              </summary>
+              <div class="cb-body">
+                <p>Contestation of a foreign power's presence at a national or strategic level — opposition to military bases, troop deployments, territorial claims, or security arrangements seen as compromising sovereignty.</p>
+                <p><em>Boundary:</em> the demand is for national-level withdrawal or territorial concession, not reform of a specific site (see Project Grievance).</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#5a8b3a;"></span>
+                <span class="cb-name">Diplomatic/Bilateral</span>
+              </summary>
+              <div class="cb-body">
+                <p>Events targeting the bilateral relationship itself — embassy and consulate protests, demonstrations during state visits, responses to specific diplomatic incidents such as expulsions or sanctions.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#d4a017;"></span>
+                <span class="cb-name">Economic Competition</span>
+              </summary>
+              <div class="cb-body">
+                <p>Grievances about foreign economic dominance, trade practices, or market competition at a policy or sector level — broader than Project Grievance. Includes protests against foreign goods undercutting local industries, economic dependency, or foreign investment policy.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#c0392b;"></span>
+                <span class="cb-name">Domestic (Solidarity)</span>
+              </summary>
+              <div class="cb-body">
+                <p>Events expressing solidarity with politically repressed or marginalised groups within the target country — Tibet, Xinjiang/Uyghurs, Hong Kong democracy movements, and equivalent causes relating to US domestic politics and rights abuses.</p>
+                <p><em>Typical events:</em> solidarity rallies at embassies or consulates; commemorations; international protests responding to the foreign power's domestic political actions.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#8e3a3a;"></span>
+                <span class="cb-name">Violence Against Nationals</span>
+              </summary>
+              <div class="cb-body">
+                <p>Physical attacks, killings, kidnappings, or targeted violence against nationals, workers, military personnel, diplomatic facilities, or diaspora communities of the target country.</p>
+                <p><em>Typical events:</em> armed attacks on foreign workers at project sites; mob violence targeting diaspora districts; kidnappings; attacks on military convoys or diplomatic premises.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#7f5a83;"></span>
+                <span class="cb-name">Xenophobia/Anti-Immigration</span>
+              </summary>
+              <div class="cb-body">
+                <p>Violence, discrimination, or exclusionary mobilisation targeting nationals or migrants of the target country as an ethnic or cultural group — driven by hostility toward the people rather than opposition to state policy.</p>
+                <p><em>Typical events:</em> hate crimes against diaspora communities; exclusionary campaigns against foreign traders; ethnically targeted violence.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#9c8a73;"></span>
+                <span class="cb-name">Symbolic/Nationalist</span>
+              </summary>
+              <div class="cb-body">
+                <p>Demonstrations expressing general nationalist opposition to a foreign power without a specific policy grievance — tied to historical anniversaries, national holidays, or broad anti-foreign sentiment. The residual category for expressive rather than instrumental activity.</p>
+              </div>
+            </details>
+
+          </div>
+        </section>
+
+        <footer class="sidebar-credit">
+          <p>Incidents drawn from ACLED, GTD, OXUS, SCAD, MMD. Data cleaned and coded by Thom Vigor (University of Kent). Official responses taken from Chinese state media and MFA, coded by Jamie Gruffydd-Jones.</p>
+        </footer>
+      </aside>
+
+      <section id="map" aria-label="Map of events"></section>
+
+      <aside id="charts" class="panel charts-panel">
+        <section class="chart-block">
+          <h2>Events per year</h2>
+          <canvas id="chart-time"></canvas>
+        </section>
+        <section class="chart-block">
+          <h2>Events 2018–present</h2>
+          <p class="chart-note">Note: data coverage is only full from 2018 onwards. Pre-2018 data is limited and skewed towards African countries.</p>
+          <canvas id="chart-time-recent"></canvas>
+        </section>
+        <section class="chart-block">
+          <h2>Top countries</h2>
+          <canvas id="chart-country"></canvas>
+        </section>
+        <section class="chart-block">
+          <h2>Response coverage</h2>
+          <canvas id="chart-response"></canvas>
+        </section>
+        <section class="chart-block">
+          <h2>Events by category</h2>
+          <canvas id="chart-category"></canvas>
+        </section>
+        <section class="chart-block">
+          <h2>Events by region</h2>
+          <canvas id="chart-region"></canvas>
+        </section>
+      </aside>
+    </main>
+
+  </body>
+</html>
