@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/antipower/assets/index-Bw6tu1gB.js"></script>
-    <link rel="stylesheet" crossorigin href="/antipower/assets/index-rJ01POcc.css">
+    <script type="module" crossorigin src="/antipower/assets/index-BU2HSiVf.js"></script>
+    <link rel="stylesheet" crossorigin href="/antipower/assets/index-CZUubgCw.css">
   </head>
   <body>
     <header class="site-header">
@@ -105,6 +105,17 @@
 
             <details class="cb-item">
               <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#1a5276;"></span>
+                <span class="cb-name">Military Forces Attacks</span>
+              </summary>
+              <div class="cb-body">
+                <p>Armed kinetic engagements against the target country's military forces and assets — bases, warships, aircraft, convoys, personnel. Distinguished from civilian protest about military presence (which falls under Sovereignty &amp; Territorial).</p>
+                <p><em>Typical events:</em> missile and drone strikes on warships; attacks on military bases; armed engagements with military personnel; IED and ambush attacks on convoys.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
                 <span class="cb-swatch" style="background:#5a8b3a;"></span>
                 <span class="cb-name">Diplomatic/Bilateral</span>
               </summary>
@@ -176,34 +187,49 @@
 
       <section id="map" aria-label="Map of events"></section>
 
-      <aside id="charts" class="panel charts-panel">
-        <section class="chart-block">
-          <h2>Events per year</h2>
-          <canvas id="chart-time"></canvas>
-        </section>
-        <section class="chart-block">
-          <h2>Events 2018–present</h2>
-          <p class="chart-note">Note: data coverage is only full from 2018 onwards. Pre-2018 data is limited and skewed towards African countries.</p>
-          <canvas id="chart-time-recent"></canvas>
-        </section>
-        <section class="chart-block">
-          <h2>Top countries</h2>
-          <canvas id="chart-country"></canvas>
-        </section>
-        <section class="chart-block">
-          <h2>Response coverage</h2>
-          <canvas id="chart-response"></canvas>
-        </section>
-        <section class="chart-block">
-          <h2>Events by category</h2>
-          <canvas id="chart-category"></canvas>
-        </section>
-        <section class="chart-block">
-          <h2>Events by region</h2>
-          <canvas id="chart-region"></canvas>
-        </section>
-      </aside>
     </main>
+
+    <section id="charts-section">
+      <div class="chart-block chart-span2">
+        <h2>Events per year</h2>
+        <canvas id="chart-time"></canvas>
+      </div>
+      <div class="chart-block chart-span2">
+        <h2>Events 2018–present</h2>
+        <p class="chart-note">Note: data coverage is only full from 2018 onwards. Pre-2018 data is limited and skewed towards African countries.</p>
+        <canvas id="chart-time-recent"></canvas>
+      </div>
+      <div class="chart-block">
+        <h2>Top countries</h2>
+        <canvas id="chart-country"></canvas>
+      </div>
+      <div class="chart-block">
+        <h2>Response coverage</h2>
+        <canvas id="chart-response"></canvas>
+      </div>
+      <div class="chart-block">
+        <h2>Events by category</h2>
+        <canvas id="chart-category"></canvas>
+      </div>
+      <div class="chart-block">
+        <h2>Events by region</h2>
+        <canvas id="chart-region"></canvas>
+      </div>
+    </section>
+
+    <section id="incident-section">
+      <div id="incident-header">
+        <h2>Recent incidents</h2>
+        <div id="incident-controls">
+          <input type="search" id="incident-search" placeholder="Search notes, actor, country…" autocomplete="off" />
+          <span id="incident-count"></span>
+        </div>
+      </div>
+      <div id="incident-list"></div>
+      <div id="incident-footer">
+        <button id="incident-more" type="button">Load more</button>
+      </div>
+    </section>
 
   </body>
 </html>
