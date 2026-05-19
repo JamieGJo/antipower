@@ -1,13 +1,35 @@
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor } from './categories.js';
-import { state, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly } from './state.js';
+import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly } from './state.js';
+
+const MFA_CAT = 'Military Forces Attacks';
 
 export function initFilters(features) {
   initDatasetToggle();
   initYearSlider(features);
   initCategoryList(features);
   initResponseFilter();
+  initMfaToggle();
+}
+
+function initMfaToggle() {
+  const toggle = document.getElementById('exclude-mfa-attacks');
+  if (!toggle) return;
+
+  toggle.addEventListener('change', (e) => {
+    const exclude = e.target.checked;
+    toggleCategory(MFA_CAT, !exclude);
+    // Keep sidebar checkbox in sync
+    const sidebarCb = document.querySelector(`input[data-cat="${MFA_CAT}"]`);
+    if (sidebarCb) sidebarCb.checked = !exclude;
+  });
+
+  // Keep toolbar toggle in sync when sidebar category list changes state
+  subscribe(() => {
+    const included = state.enabledCategories.has(MFA_CAT);
+    toggle.checked = !included;
+  });
 }
 
 function initResponseFilter() {
