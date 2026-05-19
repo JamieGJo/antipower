@@ -88,13 +88,18 @@ Chart.defaults.color = '#333';
 
 // Filter respecting dataset/category/response state but ignoring year slider, pinned to 2017+
 function filterRecent(features) {
-  const { dataset, enabledCategories, showResponseOnly } = state;
+  const { dataset, enabledCategories, showResponseOnly, showFatalitiesOnly, searchTerms } = state;
   return features.filter((f) => {
     const p = f.properties;
     if (p.year == null || p.year < 2017) return false;
     if (dataset !== 'both' && p.target !== dataset) return false;
     if (!enabledCategories.has(p.category)) return false;
     if (showResponseOnly && !p.cn_resp && !p.us_resp && !p.mfa && !p.media) return false;
+    if (showFatalitiesOnly && !(p.fatalities > 0)) return false;
+    if (searchTerms.length) {
+      const haystack = [p.notes, p.actor, p.country, p.category].filter(Boolean).join(' ').toLowerCase();
+      if (!searchTerms.some((t) => haystack.includes(t))) return false;
+    }
     return true;
   });
 }

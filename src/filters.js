@@ -1,15 +1,27 @@
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor } from './categories.js';
-import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly } from './state.js';
+import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly, setShowFatalitiesOnly, setSearch, clearSearch } from './state.js';
 
 const MFA_CAT = 'Military Forces Attacks';
+
+const TOPICS = [
+  { id: 'israel-gaza', label: 'Israel / Gaza',     terms: ['israel','palestine','gaza','hamas','west bank'] },
+  { id: 'terrorism',   label: 'Terrorism',          terms: ['terror'] },
+  { id: 'iran',        label: 'Iran / Houthi',      terms: ['iran','irgc','houthi'] },
+  { id: 'xinjiang',    label: 'Xinjiang',            terms: ['xinjiang','uyghur','east turkestan','uighur'] },
+  { id: 'ukraine',     label: 'Ukraine / Russia',   terms: ['ukraine','russia'] },
+  { id: 'trade',       label: 'Trade / Tariffs',    terms: ['tariff','trade war','dumping','sanction'] },
+];
 
 export function initFilters(features) {
   initDatasetToggle();
   initYearSlider(features);
   initCategoryList(features);
   initResponseFilter();
+  initFatalitiesFilter();
+  initPanelSearch();
+  initTopicButtons();
   initMfaToggle();
 }
 
@@ -36,6 +48,65 @@ function initResponseFilter() {
   const cb = document.getElementById('has-response-only');
   if (!cb) return;
   cb.addEventListener('change', (e) => setShowResponseOnly(e.target.checked));
+}
+
+function initFatalitiesFilter() {
+  const cb = document.getElementById('fatalities-only');
+  if (!cb) return;
+  cb.addEventListener('change', (e) => setShowFatalitiesOnly(e.target.checked));
+}
+
+function initPanelSearch() {
+  const input = document.getElementById('panel-search');
+  if (!input) return;
+
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const q = input.value.trim();
+      if (q) {
+        setSearch(q, q.split(/\s+/));
+      } else {
+        clearSearch();
+      }
+    }, 200);
+  });
+
+  // Sync input value when state changes (e.g. topic button or bottom search updates it)
+  subscribe(() => {
+    if (input !== document.activeElement) {
+      input.value = state.searchQuery;
+    }
+    // Update topic chip active states
+    document.querySelectorAll('.topic-chip').forEach((btn) => {
+      const terms = JSON.parse(btn.dataset.terms || '[]');
+      const active = terms.length > 0 &&
+        terms.every((t) => state.searchTerms.includes(t));
+      btn.classList.toggle('active', active);
+    });
+  });
+}
+
+function initTopicButtons() {
+  const container = document.getElementById('topic-chips');
+  if (!container) return;
+
+  container.innerHTML = TOPICS.map((t) =>
+    `<button class="topic-chip" data-id="${t.id}" data-terms='${JSON.stringify(t.terms)}'>${t.label}</button>`
+  ).join('');
+
+  container.querySelectorAll('.topic-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const terms = JSON.parse(btn.dataset.terms);
+      const isActive = btn.classList.contains('active');
+      if (isActive) {
+        clearSearch();
+      } else {
+        setSearch(btn.textContent.trim(), terms);
+      }
+    });
+  });
 }
 
 function initDatasetToggle() {

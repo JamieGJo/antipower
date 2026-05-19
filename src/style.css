@@ -795,3 +795,63 @@ details[open] > .cb-summary {
   color: #fff;
   border-color: var(--col-ink);
 }
+
+/* ===== Panel search ===== */
+#panel-search {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--col-border);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--col-ink);
+  margin-bottom: 8px;
+}
+#panel-search:focus {
+  outline: none;
+  border-color: var(--col-muted);
+}
+
+/* ===== Topic chips ===== */
+#topic-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.topic-chip {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border: 1px solid var(--col-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--col-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.topic-chip:hover {
+  border-color: var(--col-ink);
+  color: var(--col-ink);
+}
+.topic-chip.active {
+  background: var(--col-ink);
+  color: #fff;
+  border-color: var(--col-ink);
+}
+
+/* ===== Fatalities badge in popup ===== */
+.fatalities-badge {
+  display: inline-block;
+  background: #c0392b;
+  color: #fff;
+  font-size: 11.5px;
+  font-family: var(--font-sans);
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
