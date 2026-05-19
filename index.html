@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/antipower/assets/index-DRND2rq_.js"></script>
-    <link rel="stylesheet" crossorigin href="/antipower/assets/index-hlUfXS3W.css">
+    <script type="module" crossorigin src="/antipower/assets/index-Kkvp93Q_.js"></script>
+    <link rel="stylesheet" crossorigin href="/antipower/assets/index-DGOa_w8l.css">
   </head>
   <body>
     <header class="site-header">
@@ -55,11 +55,21 @@
           <div id="category-list"></div>
         </section>
 
+        <section class="filter-block">
+          <h2>Search</h2>
+          <input type="search" id="panel-search" placeholder="Keywords…" autocomplete="off" />
+          <div id="topic-chips"></div>
+        </section>
+
         <section class="filter-block legend-block">
-          <h2>Response status</h2>
+          <h2>Response &amp; fatalities</h2>
           <label class="filter-checkbox">
             <input type="checkbox" id="has-response-only" />
             Show only events with a response
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="fatalities-only" />
+            Show only events with fatalities
           </label>
           <ul class="legend">
             <li><span class="dot dot-cn"></span> China response identified</li>
