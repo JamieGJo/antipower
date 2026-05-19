@@ -39,11 +39,13 @@ html, body {
   color: #fff;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 3px solid var(--col-accent);
 }
 .header-inner {
   padding: 0 24px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 .site-header h1 {
   margin: 0;
@@ -55,6 +57,26 @@ html, body {
   font-size: 13px;
   color: #c5c5c8;
   font-style: italic;
+}
+.header-nav {
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+.header-nav-link {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: #c5c5c8;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 5px 12px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.header-nav-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
 .layout {
@@ -217,6 +239,30 @@ html, body {
   grid-template-columns: repeat(3, 1fr);
   gap: 28px 36px;
   border-bottom: 1px solid var(--col-border);
+}
+#charts-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+.charts-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--col-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.charts-toggle-label input[type="checkbox"] {
+  accent-color: var(--col-accent-2);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 .chart-span2 {
   grid-column: span 2;

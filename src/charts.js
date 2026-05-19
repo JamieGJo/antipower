@@ -73,7 +73,7 @@ const COUNTRY_REGION = {
 
 const REGION_ORDER = ['Asia-Pacific','Americas','Africa','Europe','N. Africa & M. East','Central Asia','Other'];
 
-let chartTime = null;
+let chartMonthly = null;
 let chartTimeRecent = null;
 let chartCountry = null;
 let chartResponse = null;
@@ -86,12 +86,12 @@ Chart.defaults.font.family = baseFontFamily;
 Chart.defaults.font.size = 11;
 Chart.defaults.color = '#333';
 
-// Filter respecting dataset/category/response state but ignoring year slider, pinned to 2018+
+// Filter respecting dataset/category/response state but ignoring year slider, pinned to 2017+
 function filterRecent(features) {
   const { dataset, enabledCategories, showResponseOnly } = state;
   return features.filter((f) => {
     const p = f.properties;
-    if (p.year == null || p.year < 2018) return false;
+    if (p.year == null || p.year < 2017) return false;
     if (dataset !== 'both' && p.target !== dataset) return false;
     if (!enabledCategories.has(p.category)) return false;
     if (showResponseOnly && !p.cn_resp && !p.us_resp && !p.mfa && !p.media) return false;
@@ -114,6 +114,36 @@ function eventsPerYear(features) {
     labels: allYears,
     cn: allYears.map((y) => cn[y] || 0),
     us: allYears.map((y) => us[y] || 0),
+  };
+}
+
+function eventsPerMonth(features, fromYear = 2017) {
+  const cn = {};
+  const us = {};
+  for (const f of features) {
+    const d = f.properties.date;
+    const y = f.properties.year;
+    if (!d || !y || y < fromYear) continue;
+    const key = d.slice(0, 7); // YYYY-MM
+    if (f.properties.target === 'anti-china') cn[key] = (cn[key] || 0) + 1;
+    else if (f.properties.target === 'anti-us') us[key] = (us[key] || 0) + 1;
+  }
+  // Build contiguous month labels from fromYear-01 to latest month found
+  const allKeys = new Set([...Object.keys(cn), ...Object.keys(us)]);
+  if (allKeys.size === 0) return { labels: [], cn: [], us: [] };
+  const maxKey = [...allKeys].sort().at(-1);
+  const labels = [];
+  let [y, m] = [fromYear, 1];
+  const [maxY, maxM] = maxKey.split('-').map(Number);
+  while (y < maxY || (y === maxY && m <= maxM)) {
+    labels.push(`${y}-${String(m).padStart(2, '0')}`);
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  return {
+    labels,
+    cn: labels.map((k) => cn[k] || 0),
+    us: labels.map((k) => us[k] || 0),
   };
 }
 
@@ -175,7 +205,7 @@ function byRegion(features) {
 
 export function initCharts(features) {
   allFeatures = features;
-  initTimeChart();
+  initMonthlyChart();
   initTimeRecentChart();
   initCountryChart();
   initResponseChart();
@@ -185,15 +215,15 @@ export function initCharts(features) {
   subscribe(updateCharts);
 }
 
-function initTimeChart() {
-  const ctx = document.getElementById('chart-time');
-  chartTime = new Chart(ctx, {
+function initMonthlyChart() {
+  const ctx = document.getElementById('chart-monthly');
+  chartMonthly = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [],
       datasets: [
-        { label: 'Anti-China', data: [], borderColor: CHART_COLORS.cn, backgroundColor: CHART_COLORS.cnFill, fill: true, tension: 0.2, pointRadius: 1.5 },
-        { label: 'Anti-US',    data: [], borderColor: CHART_COLORS.us, backgroundColor: CHART_COLORS.usFill, fill: true, tension: 0.2, pointRadius: 1.5 },
+        { label: 'Anti-China', data: [], borderColor: CHART_COLORS.cn, backgroundColor: CHART_COLORS.cnFill, fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
+        { label: 'Anti-US',    data: [], borderColor: CHART_COLORS.us, backgroundColor: CHART_COLORS.usFill, fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
       ],
     },
     options: {
@@ -201,10 +231,30 @@ function initTimeChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8 } },
-        tooltip: { mode: 'index', intersect: false },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            title: (items) => {
+              const [y, m] = items[0].label.split('-');
+              return new Date(+y, +m - 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+            },
+          },
+        },
       },
       scales: {
-        x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } },
+        x: {
+          ticks: {
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 10,
+            callback(val, i) {
+              const label = this.getLabelForValue(val);
+              return label.endsWith('-01') ? label.slice(0, 4) : '';
+            },
+          },
+          grid: { display: false },
+        },
         y: { beginAtZero: true, ticks: { precision: 0 } },
       },
     },
@@ -321,11 +371,11 @@ function updateCharts() {
   const filtered = filterFeatures(allFeatures);
   const recent = filterRecent(allFeatures);
 
-  const t = eventsPerYear(filtered);
-  chartTime.data.labels = t.labels;
-  chartTime.data.datasets[0].data = t.cn;
-  chartTime.data.datasets[1].data = t.us;
-  chartTime.update();
+  const t = eventsPerMonth(recent);
+  chartMonthly.data.labels = t.labels;
+  chartMonthly.data.datasets[0].data = t.cn;
+  chartMonthly.data.datasets[1].data = t.us;
+  chartMonthly.update();
 
   const tr = eventsPerYear(recent);
   chartTimeRecent.data.labels = tr.labels;
