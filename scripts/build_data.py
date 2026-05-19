@@ -9,11 +9,20 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 WEBSITE = HERE.parent
-ACTIVITY = WEBSITE.parent
+
+def _find_activity_root(start):
+    p = start
+    while p != p.parent:
+        if p.name == 'activity data':
+            return p
+        p = p.parent
+    return start.parent
+
+ACTIVITY = _find_activity_root(WEBSITE)
 PUBLIC_DATA = WEBSITE / 'public' / 'data'
 PUBLIC_DATA.mkdir(parents=True, exist_ok=True)
 
-THOM_PATH = ACTIVITY / 'ACLED combined' / 'ACLED' / 'data' / 'classified' / 'classified THOM' / 'THOM_ALL_v2.xlsx'
+THOM_PATH = ACTIVITY / 'ACLED combined' / 'ACLED' / 'data' / 'classified' / 'classified THOM' / 'THOM_ALL_v3_2026-05-03.xlsx'
 SINO_PATH = ACTIVITY / 'China response' / 'response to attacks' / 'china_usactivity_SINO_with_responses_v13e.xlsx'
 MFA_PATH = ACTIVITY / 'China response' / 'response to attacks' / '2026-04-09_MFA-china-threats.xlsx'
 MEDIA_PATH = ACTIVITY / 'China response' / 'response to attacks' / '2025_xinhua_GT_PD response attacks.xlsx'
@@ -48,13 +57,15 @@ def date_str(v):
 
 
 # ---------- Load events ----------
-thom = pd.read_excel(THOM_PATH, sheet_name='Data')
-print(f'THOM_v2 raw: {len(thom)} rows')
-thom = thom[thom['valid_for_analysis'].astype(bool) &
-            thom['latitude'].notna() &
-            thom['longitude'].notna()].copy()
-thom['target_dataset'] = thom['source_file'].map(
-    {'THOM_ALL': 'anti-china', 'THOM_US': 'anti-us'}
+thom = pd.read_excel(THOM_PATH, sheet_name='Sheet1')
+print(f'THOM_v3 raw: {len(thom)} rows')
+thom = thom[
+    thom['target_country'].isin(['China', 'USA']) &
+    thom['latitude'].notna() &
+    thom['longitude'].notna()
+].copy()
+thom['target_dataset'] = thom['target_country'].map(
+    {'China': 'anti-china', 'USA': 'anti-us'}
 )
 print(f'  valid + has lat/lon: {len(thom)} rows')
 
@@ -88,10 +99,7 @@ sino_keep = [c for c in response_cols if c in sino.columns]
 sino_subset = sino[sino_keep].copy()
 print(f'  kept response columns: {len(sino_keep)}')
 
-merged = thom.merge(
-    sino_subset,
-    left_on='event_id_cnty', right_on='event_id', how='left',
-)
+merged = thom.merge(sino_subset, on='event_id', how='left')
 print(f'Merged: {len(merged)} rows')
 
 
@@ -150,16 +158,17 @@ for _, r in merged.iterrows():
             'coordinates': [float(r['longitude']), float(r['latitude'])],
         },
         'properties': {
-            'id': r['event_id_cnty'],
+            'id': r['event_id'],
             'date': date_str(r['event_date']),
             'year': year,
             'country': s(r['country']),
-            'category': s(r['thom_category']),
-            'subcategory': s(r['thom_subcategory1']),
+            'category': s(r['Thom_issue1']),
+            'subcategory': s(r['Thom_ subissue1']),
             'actor': s(r['actor1']),
             'fatalities': fat,
             'target': r['target_dataset'],
             'source': s(r.get('source')),
+            'notes': s(r.get('notes')),
             'cn_resp': int(r['has_china_response']),
             'us_resp': int(r['has_us_response']),
             'mfa': int(r['has_mfa']),
@@ -176,7 +185,7 @@ print(f'Wrote events.geojson ({len(features)} features)')
 # ---------- Write responses_full.json (heavy fields, keyed by event_id) ----------
 responses_full = {}
 for _, r in merged.iterrows():
-    eid = r['event_id_cnty']
+    eid = r['event_id']
     rec = {'notes': s(r.get('notes'))}
     if r['has_china_response']:
         rec['china'] = {
@@ -230,7 +239,7 @@ mfa_quotes = {}
 for _, r in merged.iterrows():
     if not r['has_mfa']:
         continue
-    eid = r['event_id_cnty']
+    eid = r['event_id']
     threat_id = r.get('mfa_threat_id')
     matched = mfa_lookup.get(threat_id) if mfa_lookup else None
     if matched is not None:
@@ -263,7 +272,7 @@ media_quotes = {}
 for _, r in merged.iterrows():
     if not r['has_media']:
         continue
-    eid = r['event_id_cnty']
+    eid = r['event_id']
     media_quotes[eid] = {
         'date': date_str(r.get('media_match_date')),
         'source': s(r.get('media_match_source')),

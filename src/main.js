@@ -1,6 +1,7 @@
 import { initMap } from './map.js';
 import { initFilters } from './filters.js';
 import { initCharts } from './charts.js';
+import { initTable } from './table.js';
 
 async function bootstrap() {
   const url = import.meta.env.BASE_URL + 'data/events.geojson';
@@ -12,6 +13,7 @@ async function bootstrap() {
   initFilters(features);
   await initMap(features);
   initCharts(features);
+  initTable(features);
 }
 
 bootstrap().catch((e) => {
