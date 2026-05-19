@@ -59,7 +59,7 @@ function renderEventTab(p, fullRec) {
   return `
     <h3>${escapeHtml(p.country)} <small style="color:#888;font-weight:normal;">· ${escapeHtml(p.date || '')}</small></h3>
     <div class="meta">${escapeHtml(p.target === 'anti-china' ? 'Anti-China' : 'Anti-US')} ·
-      ${p.fatalities > 0 ? `<strong>${p.fatalities} fatalities</strong> · ` : ''}
+      ${p.fatalities > 0 ? `<span class="fatalities-badge">&#9888; ${p.fatalities} ${p.fatalities === 1 ? 'fatality' : 'fatalities'}</span>` : ''}
       ${escapeHtml(p.actor || '')}
     </div>
     <span class="category-tag" style="background:${color};">${escapeHtml(displayCat)}</span>${zhSpan}

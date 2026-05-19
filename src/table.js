@@ -1,4 +1,4 @@
-import { subscribe, filterFeatures } from './state.js';
+import { subscribe, filterFeatures, setSearch, state } from './state.js';
 import { CATEGORY_COLORS } from './categories.js';
 import { getMap } from './map.js';
 import { openPopup } from './popup.js';
@@ -7,7 +7,6 @@ const PAGE_SIZE = 50;
 
 let allFeatures = [];
 let filteredFeatures = [];
-let keyword = '';
 let page = 0;
 let featureIndex = {};
 
@@ -18,22 +17,12 @@ function buildIndex(features) {
   }
 }
 
-function matchesKeyword(p, kw) {
-  if (!kw) return true;
-  const haystack = [p.notes, p.actor, p.country, p.category]
-    .filter(Boolean).join(' ').toLowerCase();
-  return haystack.includes(kw);
-}
-
 function applyFilters(stateFiltered) {
-  const kw = keyword.trim().toLowerCase();
-  filteredFeatures = stateFiltered
-    .filter(f => matchesKeyword(f.properties, kw))
-    .sort((a, b) => {
-      const da = a.properties.date || '';
-      const db = b.properties.date || '';
-      return db.localeCompare(da);
-    });
+  filteredFeatures = stateFiltered.sort((a, b) => {
+    const da = a.properties.date || '';
+    const db = b.properties.date || '';
+    return db.localeCompare(da);
+  });
   page = 0;
 }
 
@@ -116,6 +105,11 @@ export function initTable(features) {
   renderRows();
 
   subscribe(() => {
+    // Keep bottom search input in sync with state.searchQuery
+    const searchInput = document.getElementById('incident-search');
+    if (searchInput && searchInput !== document.activeElement) {
+      searchInput.value = state.searchQuery;
+    }
     const sf = filterFeatures(allFeatures);
     applyFilters(sf);
     renderRows();
@@ -127,10 +121,9 @@ export function initTable(features) {
     searchInput.addEventListener('input', () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        keyword = searchInput.value;
-        const sf = filterFeatures(allFeatures);
-        applyFilters(sf);
-        renderRows();
+        const q = searchInput.value.trim();
+        const terms = q ? q.split(/\s+/) : [];
+        setSearch(q, terms);
       }, 200);
     });
   }
