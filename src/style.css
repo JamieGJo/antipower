@@ -478,6 +478,8 @@ html, body {
   flex-direction: column;
   gap: 2px;
 }
+/* [hidden] alone cannot hide a flex container - the display rule above wins. */
+.cb-list[hidden] { display: none; }
 .cb-item {
   border: 1px solid var(--col-border);
   border-radius: 3px;
