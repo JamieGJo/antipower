@@ -1,7 +1,7 @@
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
-import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor } from './categories.js';
-import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly, setShowFatalitiesOnly, setSearch, clearSearch } from './state.js';
+import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor, SCHEMES, SINO_CATEGORY_HINTS, schemeCategoryFor } from './categories.js';
+import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly, setShowFatalitiesOnly, setHideFlagged, setScheme, setSearch, clearSearch } from './state.js';
 
 const MFA_CAT = 'Military Forces Attacks';
 
@@ -20,6 +20,7 @@ export function initFilters(features) {
   initCategoryList(features);
   initResponseFilter();
   initFatalitiesFilter();
+  initFlaggedFilter();
   initPanelSearch();
   initTopicButtons();
   initMfaToggle();
@@ -48,6 +49,12 @@ function initResponseFilter() {
   const cb = document.getElementById('has-response-only');
   if (!cb) return;
   cb.addEventListener('change', (e) => setShowResponseOnly(e.target.checked));
+}
+
+function initFlaggedFilter() {
+  const cb = document.getElementById('hide-flagged');
+  if (!cb) return;
+  cb.addEventListener('change', (e) => setHideFlagged(e.target.checked));
 }
 
 function initFatalitiesFilter() {
@@ -144,29 +151,39 @@ function initYearSlider(features) {
 
 function initCategoryList(features) {
   const container = document.getElementById('category-list');
-  // Count by category for display.
-  const counts = {};
-  for (const f of features) {
-    const c = categoryFor(f.properties.category);
-    counts[c] = (counts[c] || 0) + 1;
-  }
-  // Render
-  container.innerHTML = CATEGORIES_ORDERED.map((cat) => {
-    const color = CATEGORY_COLORS[cat] || '#999';
-    const count = counts[cat] || 0;
-    return `
-      <label class="cat-item">
-        <input type="checkbox" data-cat="${cat}" checked />
+
+  // Re-rendered whenever the scheme changes, so counts/colours/hints follow it.
+  function render() {
+    const sc = SCHEMES[state.scheme] || SCHEMES.thom;
+    const counts = {};
+    for (const f of features) {
+      const c = schemeCategoryFor(f.properties, state.scheme);
+      counts[c] = (counts[c] || 0) + 1;
+    }
+    container.innerHTML = sc.ordered.map((cat) => {
+      const color = sc.colors[cat] || '#999';
+      const count = counts[cat] || 0;
+      const on = state.enabledCategories.has(cat) ? 'checked' : '';
+      const hint = state.scheme === 'sino' && SINO_CATEGORY_HINTS[cat]
+        ? `<span class="cat-hint">${SINO_CATEGORY_HINTS[cat]}</span>` : '';
+      return `
+      <label class="cat-item${hint ? ' has-hint' : ''}">
+        <input type="checkbox" data-cat="${cat}" ${on} />
         <span class="cat-swatch" style="background:${color};"></span>
         <span class="cat-label">${cat}</span>
         <span class="cat-count">${count}</span>
+        ${hint}
       </label>`;
-  }).join('');
-  container.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-    cb.addEventListener('change', (e) => {
-      toggleCategory(e.target.getAttribute('data-cat'), e.target.checked);
+    }).join('');
+    container.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.addEventListener('change', (e) => {
+        toggleCategory(e.target.getAttribute('data-cat'), e.target.checked);
+      });
     });
-  });
+  }
+
+  render();
+
   document.getElementById('cat-all').addEventListener('click', () => {
     setAllCategories(true);
     container.querySelectorAll('input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
@@ -175,4 +192,27 @@ function initCategoryList(features) {
     setAllCategories(false);
     container.querySelectorAll('input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
   });
+
+  // Scheme switcher
+  const schemeWrap = document.getElementById('scheme-toggle');
+  if (schemeWrap) {
+    schemeWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-scheme]');
+      if (!btn) return;
+      setScheme(btn.getAttribute('data-scheme'));
+    });
+  }
+
+  let renderedScheme = state.scheme;
+  subscribe(() => {
+    if (state.scheme === renderedScheme) return;
+    renderedScheme = state.scheme;
+    render();
+    if (schemeWrap) {
+      schemeWrap.querySelectorAll('button[data-scheme]').forEach((b) => {
+        b.classList.toggle('is-active', b.getAttribute('data-scheme') === state.scheme);
+      });
+    }
+  });
 }
+

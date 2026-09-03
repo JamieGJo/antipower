@@ -1,5 +1,6 @@
 import maplibregl from 'maplibre-gl';
-import { colorFor, categoryFor } from './categories.js';
+import { colorFor, categoryFor, schemeCategoryFor, schemeColorFor } from './categories.js';
+import { state } from './state.js';
 import { zhFor } from './i18n.js';
 
 let responsesCache = null;
@@ -51,11 +52,18 @@ function actionChips(actions, prefix) {
   return `<div class="actions">${active.map((a) => `<span class="action-chip">${escapeHtml(a)}</span>`).join('')}</div>`;
 }
 
+const FLAG_NOTE = {
+  'INVALID-INCIDENTAL': 'Flagged: the link to China/the US looks incidental (e.g. a protest that merely blocked the \u201cPan-American\u201d highway, or was held at a venue with \u201cAmerican\u201d in its name).',
+  'INVALID-CRIMINAL': 'Flagged: an attack on a national with no established political motive (robbery, kidnapping, banditry) rather than anti-power activity.',
+  'INVALID-UNCLEAR': 'Flagged: the relationship to the target power could not be established.',
+};
+
 function renderEventTab(p, fullRec) {
-  const displayCat = categoryFor(p.category);
+  const displayCat = schemeCategoryFor(p, state.scheme);
+  const flagNote = FLAG_NOTE[p.validity];
   const zh = p.target === 'anti-china' ? zhFor(displayCat) : null;
   const zhSpan = zh ? `<span class="zh">${escapeHtml(zh)}</span>` : '';
-  const color = colorFor(p.category);
+  const color = schemeColorFor(displayCat, state.scheme);
   return `
     <h3>${escapeHtml(p.country)} <small style="color:#888;font-weight:normal;">· ${escapeHtml(p.date || '')}</small></h3>
     <div class="meta">${escapeHtml(p.target === 'anti-china' ? 'Anti-China' : 'Anti-US')} ·
@@ -65,6 +73,7 @@ function renderEventTab(p, fullRec) {
     <span class="category-tag" style="background:${color};">${escapeHtml(displayCat)}</span>${zhSpan}
     <div class="meta" style="margin-top:6px;">${escapeHtml(p.subcategory || '')}</div>
     ${p.source ? `<div class="meta source-tag">Source: <strong>${escapeHtml(p.source)}</strong></div>` : ''}
+    ${flagNote ? `<div class="flag-note">${escapeHtml(flagNote)}</div>` : ''}
     <div class="notes">${escapeHtml(fullRec?.notes || '')}</div>
   `;
 }

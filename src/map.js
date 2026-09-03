@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { CATEGORY_COLORS } from './categories.js';
+import { CATEGORY_COLORS, SCHEMES, schemeColorFor, schemeCategoryFor } from './categories.js';
 import { openPopup } from './popup.js';
 import { state, subscribe, filterFeatures } from './state.js';
 
@@ -17,9 +17,10 @@ const SOURCE_COUNTRIES = 'country-agg';
 const LAYER_COUNTRY_CIRCLES = 'country-circles';
 const LAYER_COUNTRY_LABELS = 'country-labels';
 
-function categoryColorExpression() {
-  const expr = ['match', ['get', 'category']];
-  for (const [cat, color] of Object.entries(CATEGORY_COLORS)) {
+function categoryColorExpression(schemeKey = 'thom') {
+  const sc = SCHEMES[schemeKey] || SCHEMES.thom;
+  const expr = ['match', ['get', sc.prop]];
+  for (const [cat, color] of Object.entries(sc.colors)) {
     expr.push(cat, color);
   }
   expr.push('#888');
@@ -117,7 +118,7 @@ function buildCountryGeoJSON(features) {
 function showClusterListPopup(map, coordinates, leaves) {
   const rows = leaves.map((f, i) => {
     const p = f.properties;
-    const color = CATEGORY_COLORS[p.category] || '#888';
+    const color = schemeColorFor(schemeCategoryFor(p, state.scheme), state.scheme);
     const label = p.target === 'anti-china' ? 'Anti-China' : 'Anti-US';
     return `
       <div class="cl-row">
@@ -228,7 +229,7 @@ export async function initMap(features) {
     source: SOURCE_ID,
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-color': categoryColorExpression(),
+      'circle-color': categoryColorExpression(state.scheme),
       'circle-radius': [
         'interpolate', ['linear'], ['zoom'],
         2, 3,
@@ -337,11 +338,20 @@ export async function initMap(features) {
   });
 
   // ── Reactive filter updates ───────────────────────────────────────────────
+  let paintedScheme = state.scheme;
   subscribe(() => {
     const filtered = filterFeatures(allFeatures);
     map.getSource(SOURCE_ID).setData({ type: 'FeatureCollection', features: filtered });
     if (currentView === 'countries') {
       map.getSource(SOURCE_COUNTRIES).setData(buildCountryGeoJSON(filtered));
+    }
+    // Point colours are baked into a paint expression at layer creation, so they
+    // must be re-set when the categorisation scheme changes.
+    if (state.scheme !== paintedScheme) {
+      paintedScheme = state.scheme;
+      if (map.getLayer(LAYER_POINT)) {
+        map.setPaintProperty(LAYER_POINT, 'circle-color', categoryColorExpression(state.scheme));
+      }
     }
   });
 

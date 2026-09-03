@@ -1,5 +1,5 @@
 // Tiny reactive store. Subscribers fire on every set().
-import { CATEGORIES_ORDERED, categoryFor } from './categories.js';
+import { CATEGORIES_ORDERED, categoryFor, SCHEMES, schemeCategoryFor } from './categories.js';
 
 const listeners = new Set();
 
@@ -7,9 +7,11 @@ export const state = {
   dataset: 'both',           // 'both' | 'anti-china' | 'anti-us'
   yearMin: 1989,
   yearMax: 2025,
+  scheme: 'thom',            // 'thom' (primary) | 'sino' (secondary)
   enabledCategories: new Set(CATEGORIES_ORDERED),
   showResponseOnly: false,
   showFatalitiesOnly: false,
+  hideFlagged: false,        // hide events the master flags as not substantively about China/the US
   searchQuery: '',            // display string (shown in inputs)
   searchTerms: [],            // lowercased OR-match terms
 };
@@ -45,6 +47,16 @@ export function setAllCategories(on) {
   }
   notify();
 }
+export function setScheme(key) {
+  if (!SCHEMES[key] || state.scheme === key) return;
+  state.scheme = key;
+  state.enabledCategories = new Set(SCHEMES[key].ordered);
+  notify();
+}
+export function setHideFlagged(v) {
+  state.hideFlagged = v;
+  notify();
+}
 export function setShowResponseOnly(v) {
   state.showResponseOnly = v;
   notify();
@@ -73,12 +85,13 @@ function matchesSearch(p, terms) {
 
 // Apply current state to a feature collection, returning a *new* FeatureCollection.
 export function filterFeatures(features) {
-  const { dataset, yearMin, yearMax, enabledCategories, showResponseOnly, showFatalitiesOnly, searchTerms } = state;
+  const { dataset, yearMin, yearMax, enabledCategories, showResponseOnly, showFatalitiesOnly, searchTerms, hideFlagged } = state;
   return features.filter((f) => {
     const p = f.properties;
     if (dataset !== 'both' && p.target !== dataset) return false;
     if (p.year != null && (p.year < yearMin || p.year > yearMax)) return false;
-    if (!enabledCategories.has(categoryFor(p.category))) return false;
+    if (!enabledCategories.has(schemeCategoryFor(p, state.scheme))) return false;
+    if (hideFlagged && p.validity && p.validity !== 'VALID') return false;
     if (showResponseOnly && !p.cn_resp && !p.us_resp && !p.mfa && !p.media) return false;
     if (showFatalitiesOnly && !(p.fatalities > 0)) return false;
     if (!matchesSearch(p, searchTerms)) return false;

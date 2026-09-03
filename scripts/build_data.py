@@ -22,7 +22,7 @@ ACTIVITY = _find_activity_root(WEBSITE)
 PUBLIC_DATA = WEBSITE / 'public' / 'data'
 PUBLIC_DATA.mkdir(parents=True, exist_ok=True)
 
-THOM_PATH = ACTIVITY / 'ACLED combined' / 'ACLED' / 'data' / 'classified' / 'classified THOM' / 'THOM_ALL_v3_2026-05-03.xlsx'
+THOM_PATH = ACTIVITY / 'ACLED combined' / 'ACLED' / 'data' / 'clean' / 'Master_all_with_coding_MERGED.xlsx'
 SINO_PATH = ACTIVITY / 'China response' / 'response to attacks' / 'china_usactivity_SINO_with_responses_v13e.xlsx'
 MFA_PATH = ACTIVITY / 'China response' / 'response to attacks' / '2026-04-09_MFA-china-threats.xlsx'
 MEDIA_PATH = ACTIVITY / 'China response' / 'response to attacks' / '2025_xinhua_GT_PD response attacks.xlsx'
@@ -58,7 +58,17 @@ def date_str(v):
 
 # ---------- Load events ----------
 thom = pd.read_excel(THOM_PATH, sheet_name='Sheet1')
-print(f'THOM_v3 raw: {len(thom)} rows')
+print(f'Master raw: {len(thom)} rows')
+# Events the master flags as not substantively about China/the US are KEPT but
+# tagged, so the map can surface/filter them rather than silently dropping them:
+#   INVALID-INCIDENTAL - connection is incidental (e.g. a protest that merely blocked
+#                        the "Pan-American"/"Inter-American" highway, or was held at a
+#                        venue with "American" in its name) - sourcing-stage keyword
+#                        false positives
+#   INVALID-CRIMINAL   - ordinary crime, not political anti-power activity
+#   INVALID-UNCLEAR    - relationship to the target power could not be established
+print('  SINO_validity: ' + ', '.join(
+    f'{k}={v}' for k, v in thom['SINO_validity'].value_counts(dropna=False).items()))
 thom = thom[
     thom['target_country'].isin(['China', 'USA']) &
     thom['latitude'].notna() &
@@ -138,6 +148,33 @@ print(f'Flags: china={int(merged["has_china_response"].sum())} '
       f'media={int(merged["has_media"].sum())}')
 
 
+def sino_category(r):
+    """Secondary categorisation: SINO_breakdown, with three refinements.
+
+    1. Immigration/Xenophobia is split out of Material-Local (in the source it is
+       folded in, but it reads as its own thing on a map).
+    2. The three INVALID classes become named categories rather than blanks - the
+       SINO_breakdown blanks are exactly the invalid set, so this closes the gap:
+         Attacks on nationals - violence against Chinese/US nationals with no
+                      established political motive (96% of this bucket is coded
+                      "Violence Against Nationals"); absorbs the former Criminal class
+         Incidental - the China/US link is incidental (keyword false positives)
+         Unclear    - motive could not be established (e.g. a Chinese national
+                      attacked in a conflict zone where sources cannot say whether
+                      nationality was the reason)
+    """
+    bd = s(r.get('SINO_breakdown'))
+    if bd:
+        if bd == 'Material-Local' and s(r.get('SINO_issue1')) == 'Immigration/Xenophobia':
+            return 'Immigration/Xenophobia'
+        return bd
+    return {
+        'INVALID-CRIMINAL': 'Attacks on nationals',
+        'INVALID-INCIDENTAL': 'Incidental',
+        'INVALID-UNCLEAR': 'Unclear',
+    }.get(s(r.get('SINO_validity')), 'Uncategorised')
+
+
 # ---------- Write events.geojson (lean) ----------
 features = []
 for _, r in merged.iterrows():
@@ -163,6 +200,11 @@ for _, r in merged.iterrows():
             'year': year,
             'country': s(r['country']),
             'category': s(r['Thom_issue1']),
+            'validity': s(r.get('SINO_validity')) or 'UNCODED',
+            'sino_category': sino_category(r),
+            'sino_issue': s(r.get('SINO_issue1')),
+            'sino_breakdown': s(r.get('SINO_breakdown')),
+            'sino_code': s(r.get('SINO_code1')),
             'subcategory': s(r['Thom_ subissue1']),
             'actor': s(r['actor1']),
             'fatalities': fat,

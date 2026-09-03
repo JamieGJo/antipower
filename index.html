@@ -47,6 +47,10 @@
 
         <section class="filter-block">
           <h2>Category</h2>
+          <div id="scheme-toggle" class="scheme-toggle" role="group" aria-label="Categorisation scheme">
+            <button type="button" data-scheme="thom" class="is-active">Thom</button>
+            <button type="button" data-scheme="sino">SINO</button>
+          </div>
           <div class="category-buttons">
             <button id="cat-all" type="button">All</button>
             <button id="cat-none" type="button">None</button>
@@ -69,6 +73,11 @@
           <label class="filter-checkbox">
             <input type="checkbox" id="fatalities-only" />
             Show only events with fatalities
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="hide-flagged" />
+            Hide flagged events
+            <span class="filter-hint">Events the coding flags as not substantively about China/the US: an incidental link (e.g. a protest that merely blocked the &ldquo;Pan-American&rdquo; highway), ordinary crime, or an unclear relationship.</span>
           </label>
           <ul class="legend">
             <li><span class="dot dot-cn"></span> China response identified</li>

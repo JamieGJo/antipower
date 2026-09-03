@@ -3,6 +3,7 @@ import {
   LinearScale, CategoryScale, DoughnutController, ArcElement, Tooltip, Legend, Filler,
 } from 'chart.js';
 import { subscribe, filterFeatures, state } from './state.js';
+import { schemeCategoryFor } from './categories.js';
 import { CATEGORY_COLORS, categoryFor } from './categories.js';
 
 Chart.register(
@@ -88,12 +89,13 @@ Chart.defaults.color = '#333';
 
 // Filter respecting dataset/category/response state but ignoring year slider, pinned to 2017+
 function filterRecent(features) {
-  const { dataset, enabledCategories, showResponseOnly, showFatalitiesOnly, searchTerms } = state;
+  const { dataset, enabledCategories, showResponseOnly, showFatalitiesOnly, searchTerms, hideFlagged } = state;
   return features.filter((f) => {
     const p = f.properties;
     if (p.year == null || p.year < 2017) return false;
     if (dataset !== 'both' && p.target !== dataset) return false;
-    if (!enabledCategories.has(p.category)) return false;
+    if (!enabledCategories.has(schemeCategoryFor(p, state.scheme))) return false;
+    if (hideFlagged && p.validity && p.validity !== 'VALID') return false;
     if (showResponseOnly && !p.cn_resp && !p.us_resp && !p.mfa && !p.media) return false;
     if (showFatalitiesOnly && !(p.fatalities > 0)) return false;
     if (searchTerms.length) {
