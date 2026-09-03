@@ -86,17 +86,11 @@ export const SINO_CATEGORIES_ORDERED = [
   'Unclear',
 ];
 
-// Shown under each SINO category in the sidebar.
-export const SINO_CATEGORY_HINTS = {
-  'Attacks on nationals': 'Violence against Chinese/US nationals with no established political motive \u2014 robbery, kidnapping, banditry.',
-  'Incidental': 'The China/US link is incidental \u2014 e.g. a protest that merely blocked the \u201cPan-American\u201d highway.',
-  'Unclear':    'Motive could not be established \u2014 e.g. a national attacked in a conflict zone where sources cannot say whether nationality was the reason.',
-};
 
 export const SCHEMES = {
-  thom: { key: 'thom', label: 'Thom', prop: 'category',
+  thom: { key: 'thom', label: 'Breakdown', prop: 'category',
           ordered: CATEGORIES_ORDERED, colors: CATEGORY_COLORS, remap: true },
-  sino: { key: 'sino', label: 'SINO', prop: 'sino_category',
+  sino: { key: 'sino', label: 'Typology', prop: 'sino_category',
           ordered: SINO_CATEGORIES_ORDERED, colors: SINO_CATEGORY_COLORS, remap: false },
 };
 

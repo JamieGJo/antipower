@@ -48,8 +48,8 @@
         <section class="filter-block">
           <h2>Category</h2>
           <div id="scheme-toggle" class="scheme-toggle" role="group" aria-label="Categorisation scheme">
-            <button type="button" data-scheme="thom" class="is-active">Thom</button>
-            <button type="button" data-scheme="sino">SINO</button>
+            <button type="button" data-scheme="thom" class="is-active">Breakdown</button>
+            <button type="button" data-scheme="sino">Typology</button>
           </div>
           <div class="category-buttons">
             <button id="cat-all" type="button">All</button>
@@ -89,7 +89,11 @@
 
         <section class="filter-block" style="border-bottom:none;">
           <h2>Codebook</h2>
-          <div class="cb-list">
+          <div id="cb-tabs" class="cb-tabs" role="tablist">
+            <button type="button" data-cb="thom" class="is-active" role="tab">Breakdown</button>
+            <button type="button" data-cb="sino" role="tab">Typology</button>
+          </div>
+          <div class="cb-list" data-cb-pane="thom">
 
             <details class="cb-item">
               <summary class="cb-summary">
@@ -198,6 +202,142 @@
               </div>
             </details>
 
+          </div>
+
+          <div class="cb-list" data-cb-pane="sino" hidden>
+            <p class="cb-intro">The Typology scheme groups events by the <em>grievance dimension</em> driving them. Its last three categories cover events not substantively about China or the US; these are flagged rather than dropped, and can be hidden via <em>Response &amp; fatalities → Hide flagged events</em>.</p>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#1a5276;"></span>
+                <span class="cb-name">Sovereignty-Security</span>
+              </summary>
+              <div class="cb-body">
+                <p>Foreign military presence, armed operations, and territorial claims — the hard-security face of sovereignty.</p>
+                <p><em>Detail:</em> Codes: S-MI-civ (military presence, civil), S-MI-arm (military presence, armed), S-TE (territorial). Largest category; mostly events Breakdown files under Military Forces Attacks or Sovereignty &amp; Territorial.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#2c5f8d;"></span>
+                <span class="cb-name">Sovereignty-Identity</span>
+              </summary>
+              <div class="cb-body">
+                <p>Objections to interference in domestic politics — official visits, diplomatic presence, and perceived meddling in internal affairs.</p>
+                <p><em>Detail:</em> Codes: S-DI, S-PI. Overwhelmingly coded &ldquo;sovereignty (perceived)&rdquo; rather than direct territorial infringement.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#34495e;"></span>
+                <span class="cb-name">Power-Political</span>
+              </summary>
+              <div class="cb-body">
+                <p>Domestic regime contests in which the target power is invoked by one side — the grievance is about who governs, with China or the US implicated in that argument.</p>
+                <p><em>Detail:</em> Code: P-RO (regime opposition).</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#5d6d7e;"></span>
+                <span class="cb-name">Power-Proxy</span>
+              </summary>
+              <div class="cb-body">
+                <p>Events where the target power is engaged at one remove — through a partner state, an allied force, or a third-party project rather than directly.</p>
+                <p><em>Detail:</em> Small category (49). Mixed codes; often Baloch, Sahel, or partner-state contexts.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#7f5a83;"></span>
+                <span class="cb-name">Value-Identity</span>
+              </summary>
+              <div class="cb-body">
+                <p>Solidarity or hostility grounded in shared identity — ethnic, national, religious, or diasporic kinship with a group associated with the target power.</p>
+                <p><em>Detail:</em> Codes: V-IDd / V-ID (co-identity). Note the project’s identity-robustness variant reassigns ~1,083 co-identity rows from Values to Sovereignty.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#a569bd;"></span>
+                <span class="cb-name">Value-Ideology</span>
+              </summary>
+              <div class="cb-body">
+                <p>Normative and ideological claims — human rights, democracy, and political-solidarity campaigns directed at or about the target power.</p>
+                <p><em>Detail:</em> Codes: V-SO (solidarity), V-HR (human rights), V-HE, V-SOC.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#d4a017;"></span>
+                <span class="cb-name">Material-Local</span>
+              </summary>
+              <div class="cb-body">
+                <p>Concrete local grievances at a specific site or project — wages and labour conditions, resource extraction, environmental harm, land.</p>
+                <p><em>Detail:</em> Codes: E-LA (labour), E-RE (resources), E-EN, E-IM. Corresponds closely to Breakdown’s Project Grievance.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#e67e22;"></span>
+                <span class="cb-name">Material-Nationalism</span>
+              </summary>
+              <div class="cb-body">
+                <p>Economic nationalism — tariffs, trade competition, and protection of domestic industry framed against the target power.</p>
+                <p><em>Detail:</em> Codes: S-TR (trade-as-sovereignty), E-TR (trade).</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#5a8b3a;"></span>
+                <span class="cb-name">Immigration/Xenophobia</span>
+              </summary>
+              <div class="cb-body">
+                <p>Hostility toward migrants, workers, or residents associated with the target power, expressed as anti-immigration or xenophobic action.</p>
+                <p><em>Detail:</em> Codes: I-XN, I-RH, I-SC. Split out of Material-Local, where the source scheme folds it in.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#8a8a8a;"></span>
+                <span class="cb-name">Attacks on nationals</span>
+              </summary>
+              <div class="cb-body">
+                <p>Violence against Chinese or US nationals with no established political motive — robbery, kidnapping, banditry.</p>
+                <p><em>Detail:</em> Absorbs the source scheme’s Criminal class (INVALID-CRIMINAL); 96% of it is coded Violence Against Nationals under Breakdown. Distinguished from Unclear by the motive being positively assessed as non-political.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#b0b0b0;"></span>
+                <span class="cb-name">Incidental</span>
+              </summary>
+              <div class="cb-body">
+                <p>The link to China or the US is incidental — the event is not substantively about either power.</p>
+                <p><em>Detail:</em> INVALID-INCIDENTAL. Mostly sourcing-stage keyword false positives, e.g. protests matched only because they blocked the &ldquo;Pan-American&rdquo; or &ldquo;Inter-American&rdquo; highway, or were held at a venue with &ldquo;American&rdquo; in its name.</p>
+              </div>
+            </details>
+
+            <details class="cb-item">
+              <summary class="cb-summary">
+                <span class="cb-swatch" style="background:#9c8a73;"></span>
+                <span class="cb-name">Unclear</span>
+              </summary>
+              <div class="cb-body">
+                <p>A national was harmed, but sources cannot establish whether nationality was the reason — the honest &ldquo;can’t tell&rdquo; bucket between anti-power activity and ordinary crime.</p>
+                <p><em>Detail:</em> INVALID-UNCLEAR. 78% coded Violence Against Nationals; concentrated in conflict states (Sudan, Myanmar, Nigeria, CAR, Iraq, Pakistan, DRC) and rising sharply — 2 events in the 1990s to 62 in the 2020s.</p>
+              </div>
+            </details>
           </div>
         </section>
 

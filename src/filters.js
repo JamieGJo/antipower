@@ -1,6 +1,6 @@
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
-import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor, SCHEMES, SINO_CATEGORY_HINTS, schemeCategoryFor } from './categories.js';
+import { CATEGORIES_ORDERED, CATEGORY_COLORS, categoryFor, SCHEMES, schemeCategoryFor } from './categories.js';
 import { state, subscribe, setDataset, setYearRange, toggleCategory, setAllCategories, setShowResponseOnly, setShowFatalitiesOnly, setHideFlagged, setScheme, setSearch, clearSearch } from './state.js';
 
 const MFA_CAT = 'Military Forces Attacks';
@@ -21,6 +21,7 @@ export function initFilters(features) {
   initResponseFilter();
   initFatalitiesFilter();
   initFlaggedFilter();
+  initCodebookTabs();
   initPanelSearch();
   initTopicButtons();
   initMfaToggle();
@@ -49,6 +50,30 @@ function initResponseFilter() {
   const cb = document.getElementById('has-response-only');
   if (!cb) return;
   cb.addEventListener('change', (e) => setShowResponseOnly(e.target.checked));
+}
+
+function initCodebookTabs() {
+  const tabs = document.getElementById('cb-tabs');
+  if (!tabs) return;
+  const show = (key) => {
+    tabs.querySelectorAll('button[data-cb]').forEach((b) => {
+      b.classList.toggle('is-active', b.getAttribute('data-cb') === key);
+    });
+    document.querySelectorAll('[data-cb-pane]').forEach((pane) => {
+      pane.hidden = pane.getAttribute('data-cb-pane') !== key;
+    });
+  };
+  tabs.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-cb]');
+    if (b) show(b.getAttribute('data-cb'));
+  });
+  // Follow the category scheme, so the codebook documents what is on the map.
+  let last = state.scheme;
+  subscribe(() => {
+    if (state.scheme === last) return;
+    last = state.scheme;
+    show(state.scheme);
+  });
 }
 
 function initFlaggedFilter() {
@@ -164,15 +189,12 @@ function initCategoryList(features) {
       const color = sc.colors[cat] || '#999';
       const count = counts[cat] || 0;
       const on = state.enabledCategories.has(cat) ? 'checked' : '';
-      const hint = state.scheme === 'sino' && SINO_CATEGORY_HINTS[cat]
-        ? `<span class="cat-hint">${SINO_CATEGORY_HINTS[cat]}</span>` : '';
       return `
-      <label class="cat-item${hint ? ' has-hint' : ''}">
+      <label class="cat-item">
         <input type="checkbox" data-cat="${cat}" ${on} />
         <span class="cat-swatch" style="background:${color};"></span>
         <span class="cat-label">${cat}</span>
         <span class="cat-count">${count}</span>
-        ${hint}
       </label>`;
     }).join('');
     container.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
