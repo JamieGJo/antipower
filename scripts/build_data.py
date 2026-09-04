@@ -88,13 +88,14 @@ response_cols = [
     'event_id',
     'china_response_found', 'china_response_source_type', 'china_response_date',
     'china_response_url', 'china_response_excerpt', 'china_protest_priority',
+    'china_response_search_cov',
     'cn_act_diplomatic', 'cn_act_economic', 'cn_act_legal', 'cn_act_evacuation',
     'cn_act_security_deployment', 'cn_act_travel_warning',
     'cn_act_compensation_sought', 'cn_act_compensation_received', 'cn_act_other',
     'cn_act_url', 'cn_act_date',
     'host_response',
     'us_response_found', 'us_response_source_type', 'us_response_date',
-    'us_response_url', 'us_response_excerpt',
+    'us_response_url', 'us_response_excerpt', 'us_response_search_cov',
     'us_dod_response_found', 'us_dod_source',
     'us_act_diplomatic', 'us_act_economic', 'us_act_legal', 'us_act_evacuation',
     'us_act_security_deployment', 'us_act_travel_warning',
@@ -142,10 +143,27 @@ merged['has_us_response'] = (
 merged['has_mfa'] = merged['mfa_threat_id'].notna().astype(int) if 'mfa_threat_id' in merged.columns else 0
 merged['has_media'] = merged['media_match_source'].notna().astype(int) if 'media_match_source' in merged.columns else 0
 
+# Was a response actively searched for at all? china_response_search_cov /
+# us_response_search_cov are populated only for the power a given event targets
+# (verified disjoint), so an event with neither populated was never searched -
+# it should read as "not searched", not lumped in with "searched and found none".
+china_cov = merged['china_response_search_cov'] if 'china_response_search_cov' in merged.columns else None
+us_cov = merged['us_response_search_cov'] if 'us_response_search_cov' in merged.columns else None
+if china_cov is not None or us_cov is not None:
+    searched = pd.Series(False, index=merged.index)
+    if china_cov is not None:
+        searched |= china_cov.notna()
+    if us_cov is not None:
+        searched |= us_cov.notna()
+    merged['was_searched'] = searched.astype(int)
+else:
+    merged['was_searched'] = 0
+
 print(f'Flags: china={int(merged["has_china_response"].sum())} '
       f'us={int(merged["has_us_response"].sum())} '
       f'mfa={int(merged["has_mfa"].sum())} '
-      f'media={int(merged["has_media"].sum())}')
+      f'media={int(merged["has_media"].sum())} '
+      f'searched={int(merged["was_searched"].sum())}')
 
 
 def sino_category(r):
@@ -215,6 +233,7 @@ for _, r in merged.iterrows():
             'us_resp': int(r['has_us_response']),
             'mfa': int(r['has_mfa']),
             'media': int(r['has_media']),
+            'searched': int(r['was_searched']),
         },
     })
 

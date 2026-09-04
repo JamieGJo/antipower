@@ -169,14 +169,20 @@ function topCountries(features, n = 15) {
 }
 
 function responseCoverage(features) {
+  // "none" splits into events where a response was actively searched for and
+  // not found, vs events never searched at all (most of the corpus - search
+  // coverage is a small, uneven subset; see build_data.py `searched`). Lumping
+  // the two together overstated the "no response" rate.
   let any = 0;
-  let none = 0;
+  let searchedNone = 0;
+  let unsearched = 0;
   for (const f of features) {
     const p = f.properties;
     if (p.cn_resp || p.us_resp || p.mfa || p.media) any++;
-    else none++;
+    else if (p.searched) searchedNone++;
+    else unsearched++;
   }
-  return { any, none };
+  return { any, searchedNone, unsearched };
 }
 
 function byCategory(features) {
@@ -320,8 +326,8 @@ function initResponseChart() {
   chartResponse = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Some response identified', 'No response identified'],
-      datasets: [{ data: [0, 0], backgroundColor: ['#b5000f', '#d8d6cf'] }],
+      labels: ['Response identified', 'Searched, none found', 'Not searched'],
+      datasets: [{ data: [0, 0, 0], backgroundColor: ['#b5000f', '#8c8a80', '#d8d6cf'] }],
     },
     options: {
       responsive: true,
@@ -396,7 +402,7 @@ function updateCharts() {
   chartCountry.update();
 
   const r = responseCoverage(filtered);
-  chartResponse.data.datasets[0].data = [r.any, r.none];
+  chartResponse.data.datasets[0].data = [r.any, r.searchedNone, r.unsearched];
   chartResponse.update();
 
   const cat = byCategory(filtered);
